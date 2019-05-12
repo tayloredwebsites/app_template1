@@ -1,8 +1,7 @@
 =begin
-Template Name: Kickstart application template - Tailwind CSS
-Author: Andy Leverenz
-Author URI: https://web-crunch.com
-Instructions: $ rails new myapp -d <postgresql, mysql, sqlite> -m template.rb
+Template Name: DAT Template 1
+Author: David A Taylor
+Instructions: $ rails new myapp -m appTemplate1.rb
 =end
 
 def source_paths
@@ -10,12 +9,25 @@ def source_paths
 end
 
 def add_gems
-  gem 'devise', '~> 4.6', '>= 4.6.2'
-  gem 'friendly_id', '~> 5.2', '>= 5.2.5'
-  gem 'sidekiq', '~> 5.2', '>= 5.2.7'
-  gem_group :development, :test do
-    gem 'better_errors'
+  gem 'devise', '~> 4.6.2'
+  gem 'cancancan', '~> 3.0.1'
+  gem 'gretel', '~> 3.0.9'    # breadcrumbs ( last release for this gem )
+  gem 'sass-rails', '~> 5.0.7'
+  gem 'uglifier', '>= 4.1.20'  # compressor for JavaScript assets
+
+  gem_group :development do
+    gem 'letter_opener', '~> 1.7.0'
+    gem 'better_errors', '~> 2.5.1'
+    gem 'binding_of_caller', '~> 0.8.0'
+    gem 'ten_years_rails', '~> 0.2.0' # for rails 4.1.13 and later
   end
+  gem_group :test do
+    gem 'capybara', '~> 3.19.1'
+    gem 'factory_bot_rails', '~> 5.0.2', require: false
+    gem 'simplecov', '~> 0.16.1', require: false
+    gem 'rails-controller-testing', '~> 1.0.4' # add assigns and assert template to controller testing
+    gem 'launchy', '~> 2.4.3' # for launching save_and_open_page to default browser (rspec only?)
+    end
 end
 
 def add_users
@@ -25,17 +37,10 @@ def add_users
   # Configure Devise
   environment "config.action_mailer.default_url_options = { host: 'localhost', port: 3000 }",
               env: 'development'
-
   route "root to: 'home#index'"
 
   # Create Devise User
-  generate :devise, "User", "username", "name", "admin:boolean"
-
-  # set admin boolean to false by default
-  in_root do
-    migration = Dir.glob("db/migrate/*").max_by{ |f| File.mtime(f) }
-    gsub_file migration, /:admin/, ":admin, default: false"
-  end
+  generate :devise, "User", "username", "name", "roles"
 end
 
 def copy_templates
@@ -58,33 +63,8 @@ def remove_app_css
   remove_file "app/assets/stylesheets/application.css"
 end
 
-def add_sidekiq
-  environment "config.active_job.queue_adapter = :sidekiq"
-
-  insert_into_file "config/routes.rb",
-    "require 'sidekiq/web'\n\n",
-    before: "Rails.application.routes.draw do"
-
-  content = <<-RUBY
-    authenticate :user, lambda { |u| u.admin? } do
-      mount Sidekiq::Web => '/sidekiq'
-    end
-  RUBY
-  insert_into_file "config/routes.rb", "#{content}\n\n", after: "Rails.application.routes.draw do\n"
-end
-
 def add_foreman
   copy_file "Procfile"
-end
-
-def add_friendly_id
-  generate "friendly_id"
-
-  insert_into_file(
-    Dir["db/migrate/**/*friendly_id_slugs.rb"].first,
-    "[5.2]",
-    after: "ActiveRecord::Migration"
-  )
 end
 
 def stop_spring
@@ -100,11 +80,9 @@ after_bundle do
   stop_spring
   add_users
   remove_app_css
-  add_sidekiq
   add_foreman
   copy_templates
   add_tailwind
-  add_friendly_id
 
   # Migrate
   rails_command "db:create"
