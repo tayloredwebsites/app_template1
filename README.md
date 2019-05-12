@@ -30,24 +30,26 @@ An application template based upon [kickoff_tailwind](https://github.com/justale
 ### Creating a new app
 
 ```bash
-$ rails new sample_app -d <postgresql, mysql, sqlite> -m template.rb
+$ rails new sample_app -d <postgresql, mysql, sqlite> -m <app_template_dir/template.rb
 ```
 
-### Once installed what do I get?
+#### Notes.
+
+- Foreman may need to be installed:
+    - `npm install -g foreman` to install foreman through npm
+    - `gem install foreman` to install foreman as a global gem on your system.
+    - Note: Webpack will still compile down with just `rails server` if you don't want to use Foreman.
 
 - Webpack support + Tailwind CSS configured in the `app/javascript` directory.
 - Devise with a new `username` and `name` field already migrated in. Enhanced views using Tailwind CSS.
-- Foreman support thanks to a `Profile`.
-    - Run `foreman start` to initalize and head to `locahost:5000` to get `rails server`and `webpack-dev-server` running all in one terminal instance.
-    - Note: Webpack will still compile down with just `rails server` if you don't want to use Foreman.
-    - Installation.
-        - Foreman needs to be installed as a global gem on your system for this to work. i.e. `gem install foreman`
+
 - ??? A custom scaffold view template when generating theme resources (Work in progress) ????
 - Git repo initialized at end of template processing.
 
 #### Getting started.
 
 - To start application :
-    - Open a new terminal instance and run `foreman start`.
-    - Head to `locahost:5000` to see your app.
+    - On console, run `foreman start` to get `rails server`and `webpack-dev-server` running all in one terminal instance.
+    - Open up browser to: `locahost:5000` to see website.
+
     - You'll have hot reloading on `js` and `css` and `scss/sass` files by default.

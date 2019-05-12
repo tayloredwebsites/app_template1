@@ -12,7 +12,6 @@ def add_gems
   gem 'devise', '~> 4.6.2'
   gem 'cancancan', '~> 3.0.1'
   gem 'gretel', '~> 3.0.9'    # breadcrumbs ( last release for this gem )
-  gem 'sass-rails', '~> 5.0.7'
   gem 'uglifier', '>= 4.1.20'  # compressor for JavaScript assets
 
   gem_group :development do
@@ -22,7 +21,6 @@ def add_gems
     gem 'ten_years_rails', '~> 0.2.0' # for rails 4.1.13 and later
   end
   gem_group :test do
-    gem 'capybara', '~> 3.19.1'
     gem 'factory_bot_rails', '~> 5.0.2', require: false
     gem 'simplecov', '~> 0.16.1', require: false
     gem 'rails-controller-testing', '~> 1.0.4' # add assigns and assert template to controller testing
@@ -30,15 +28,19 @@ def add_gems
     end
 end
 
-def add_users
+def add_devise
   # Install Devise
   generate "devise:install"
+end
 
+def configure_devise
   # Configure Devise
   environment "config.action_mailer.default_url_options = { host: 'localhost', port: 3000 }",
               env: 'development'
   route "root to: 'home#index'"
+end
 
+def devise_user_table
   # Create Devise User
   generate :devise, "User", "username", "name", "roles"
 end
@@ -78,7 +80,9 @@ add_gems
 
 after_bundle do
   stop_spring
-  add_users
+  add_devise
+  configure_devise
+  devise_user_table
   remove_app_css
   add_foreman
   copy_templates
@@ -93,11 +97,11 @@ after_bundle do
   git commit: %Q{ -m "Initial commit" }
 
   say
-  say "Kickoff app successfully created! 👍", :green
+  say "Application successfully created from template! 👍", :green
   say
   say "Switch to your app by running:"
   say "$ cd #{app_name}", :yellow
   say
   say "Then run:"
-  say "$ rails server", :green
+  say "> foreman", :green
 end
