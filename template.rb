@@ -37,12 +37,13 @@ def configure_devise
   # Configure Devise
   environment "config.action_mailer.default_url_options = { host: 'localhost', port: 3000 }",
               env: 'development'
+  route "resources :users"
   route "root to: 'home#index'"
 end
 
 def devise_user_table
   # Create Devise User
-  generate :devise, "User", "username", "name", "roles"
+  generate :devise, "User", "givenName", "familyName", "role"
 end
 
 def copy_templates
