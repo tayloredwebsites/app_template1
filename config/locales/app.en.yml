@@ -1,0 +1,19 @@
+en:
+  app:
+    errors:
+      error: "ERROR: "
+      errors: "ERRORS: "
+    messages:
+      welcome: "Welcome "
+  users:
+    labels:
+      email: "E-mail"
+      password: "Password"
+      password_confirmation: "Confirm Password"
+      given_name: "Given (first) Name"
+      family_name: "Family (last) Name"
+      role: "Role"
+      deleted: "Deleted"
+    errors:
+      set_invalid_role: "You are not allowed to set this type of user role."
+      email_is_req: "Email is a required field."

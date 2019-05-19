@@ -43,8 +43,9 @@ end
 
 def devise_user_table
   # Create Devise User
-  generate :devise, "User", "givenName", "familyName", "role"
+  generate :devise, "User", "given_name", "family_name", "role", "deleted"
 end
+
 
 def copy_templates
   directory "app", force: true
@@ -74,6 +75,31 @@ def stop_spring
   run "spring stop"
 end
 
+# problems inplementing Rake
+# rake aborted! - NameError: uninitialized constant User
+def create_user
+  rakefile("load_users.rake") do
+    <<-TASK
+      namespace :load_users do
+        task :run do
+          user = User.new()
+          user.email = "tayloredwebsites@me.com"
+          user.given_name = "Dave"
+          user.family_name = "Taylor"
+          user.role = "admin"
+          if user.save()
+            puts "created Dave user"
+          else
+            puts "ERROR creating Dave user"
+          end
+        end
+      end
+    TASK
+  end
+  run "rake load_users:run"
+end
+
+
 # Main setup
 source_paths
 
@@ -92,6 +118,8 @@ after_bundle do
   # Migrate
   rails_command "db:create"
   rails_command "db:migrate"
+
+  # create_user # rake aborted! - NameError: uninitialized constant User
 
   git :init
   git add: "."
