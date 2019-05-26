@@ -113,7 +113,7 @@ class UsersController < ApplicationController
 
   def get_auth_users_list()
     if user_is_admin?(current_user)
-      @users = User.to_a
+      @users = User.all
     else
       @users = [current_user]
     end

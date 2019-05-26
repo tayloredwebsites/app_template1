@@ -23,7 +23,9 @@ end
 def add_gems
   gem 'bootstrap', '~> 4.3', '>= 4.3.1'
   gem 'devise', '~> 4.6.2'
-  gem 'devise-bootstrapped', github: 'excid3/devise-bootstrapped', branch: 'bootstrap4'
+  # gem 'devise-bootstrapped', github: 'excid3/devise-bootstrapped', branch: 'bootstrap4'
+  gem 'devise-i18n'
+  gem 'devise-bootstrap-views', '~> 1.0'
   gem 'devise_masquerade', '~> 0.6.2'
   gem 'font-awesome-sass', '~> 5.6', '>= 5.6.1'
   gem 'cancancan', '~> 3.0.1'
@@ -64,6 +66,10 @@ end
 def devise_user_table
   # Create Devise User
   generate :devise, "User", "given_name", "family_name", "role", "deleted"
+end
+
+def devise_bootstrap_views
+  run "rails generate devise:views:bootstrap_templates"
 end
 
 
@@ -197,6 +203,7 @@ after_bundle do
   add_devise
   configure_devise
   devise_user_table
+  # devise_bootstrap_views
   add_webpack_if_rails_5
   add_javascript
   remove_app_css
