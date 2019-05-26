@@ -1,4 +1,4 @@
-/* Forms */
+/* Forms
 .input {
   @apply appearance-none block w-full bg-gray-100 text-gray-700 border border-gray-300 rounded py-3 px-4 leading-tight;
 }
@@ -19,4 +19,19 @@
 
 .select:focus {
   @apply outline-none bg-white border-gray-400;
+}
+ */
+
+ fieldset {
+  display: flex;
+  label {
+      width: 39%;
+      text-align: right;
+      margin-right: 5px;
+      margin-top: 5px;
+    }
+  input, textarea, select, .password_field {
+      width: 59%;
+      margin-left: 5px;
+  }
 }

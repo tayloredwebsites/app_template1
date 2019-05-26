@@ -8,8 +8,24 @@ def source_paths
   [File.expand_path(File.dirname(__FILE__))]
 end
 
+def rails_version
+  @rails_version ||= Gem::Version.new(Rails::VERSION::STRING)
+end
+
+def rails_5?
+  Gem::Requirement.new(">= 5.2.0", "< 6.0.0.beta1").satisfied_by? rails_version
+end
+
+def rails_6?
+  Gem::Requirement.new(">= 6.0.0.beta1", "< 7").satisfied_by? rails_version
+end
+
 def add_gems
+  gem 'bootstrap', '~> 4.3', '>= 4.3.1'
   gem 'devise', '~> 4.6.2'
+  gem 'devise-bootstrapped', github: 'excid3/devise-bootstrapped', branch: 'bootstrap4'
+  gem 'devise_masquerade', '~> 0.6.2'
+  gem 'font-awesome-sass', '~> 5.6', '>= 5.6.1'
   gem 'cancancan', '~> 3.0.1'
   gem 'gretel', '~> 3.0.9'    # breadcrumbs ( last release for this gem )
   gem 'uglifier', '>= 4.1.20'  # compressor for JavaScript assets
@@ -25,7 +41,11 @@ def add_gems
     gem 'simplecov', '~> 0.16.1', require: false
     gem 'rails-controller-testing', '~> 1.0.4' # add assigns and assert template to controller testing
     gem 'launchy', '~> 2.4.3' # for launching save_and_open_page to default browser (rspec only?)
-    end
+  end
+  if rails_5?
+    gsub_file "Gemfile", /gem 'sqlite3'/, "gem 'sqlite3', '~> 1.3.0'"
+    gem 'webpacker', '~> 4.0.1'
+  end
 end
 
 def add_devise
@@ -48,7 +68,16 @@ end
 
 
 def copy_templates
+  copy_file "Procfile"
+  copy_file "Procfile.dev"
+  copy_file ".foreman"
+
   directory "app", force: true
+  # directory "config", force: true
+  # directory "lib", force: true
+
+  # route "get '/terms', to: 'home#terms'"
+  # route "get '/privacy', to: 'home#privacy'"
 end
 
 def add_tailwind
@@ -62,10 +91,39 @@ def add_tailwind
   run "mkdir app/javascript/stylesheets/components"
 end
 
+def add_webpack_if_rails_5
+  # Rails 6+ comes with webpacker by default, so we can skip this step
+  return if rails_6?
+
+  # Our application layout already includes the javascript_pack_tag,
+  # so we don't need to inject it
+  rails_command 'webpacker:install'
+end
+
+def add_javascript
+  run "yarn add expose-loader jquery popper.js bootstrap data-confirm-modal local-time"
+
+  if rails_5?
+    run "yarn add turbolinks @rails/actioncable@pre @rails/actiontext@pre @rails/activestorage@pre @rails/ujs@pre"
+  end
+
+  content = <<-JS
+    const webpack = require('webpack')
+    environment.plugins.append('Provide', new webpack.ProvidePlugin({
+      $: 'jquery',
+      jQuery: 'jquery',
+      Rails: '@rails/ujs'
+    }))
+  JS
+
+  insert_into_file 'config/webpack/environment.js', content + "\n", before: "module.exports = environment"
+end
+
 # Remove Application CSS
 def remove_app_css
   remove_file "app/assets/stylesheets/application.css"
 end
+
 
 def add_foreman
   copy_file "Procfile"
@@ -75,22 +133,25 @@ def stop_spring
   run "spring stop"
 end
 
-# problems inplementing Rake
+# problems running Rake
 # rake aborted! - NameError: uninitialized constant User
 def create_user
   rakefile("load_users.rake") do
     <<-TASK
       namespace :load_users do
-        task :run do
+        task run: :environment do
           user = User.new()
           user.email = "tayloredwebsites@me.com"
           user.given_name = "Dave"
           user.family_name = "Taylor"
+          user.password = 'password'
+          user.password_confirmation = 'password'
           user.role = "admin"
           if user.save()
             puts "created Dave user"
           else
-            puts "ERROR creating Dave user"
+            # note split variable indicator for application template parsing
+            puts "ERROR creating Dave user #"+"{user.errors.messages}"
           end
         end
       end
@@ -99,6 +160,32 @@ def create_user
   run "rake load_users:run"
 end
 
+def create_locale_en
+  file 'config/locales/app.en.yml', <<-CODE
+    en:
+      app:
+        errors:
+          error: "ERROR: "
+          errors: "ERRORS: "
+        messages:
+          welcome: "Welcome "
+      nav_bar:
+        home: "Home"
+        users: 'Users'
+      users:
+        labels:
+          email: "E-mail"
+          password: "Password"
+          password_confirmation: "Confirm Password"
+          given_name: "Given (first) Name"
+          family_name: "Family (last) Name"
+          role: "Role"
+          deleted: "Deleted"
+        errors:
+          set_invalid_role: "You are not allowed to set this type of user role."
+          email_is_req: "Email is a required field."
+    CODE
+end
 
 # Main setup
 source_paths
@@ -110,6 +197,8 @@ after_bundle do
   add_devise
   configure_devise
   devise_user_table
+  add_webpack_if_rails_5
+  add_javascript
   remove_app_css
   add_foreman
   copy_templates
@@ -119,7 +208,8 @@ after_bundle do
   rails_command "db:create"
   rails_command "db:migrate"
 
-  # create_user # rake aborted! - NameError: uninitialized constant User
+  create_user
+  create_locale_en
 
   git :init
   git add: "."
