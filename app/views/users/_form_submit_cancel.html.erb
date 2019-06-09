@@ -1,6 +1,8 @@
-<div class="row button-row">
-  <span class='col col-md-12'>
-    <%= form.submit  I18n.translate('app.labels.cancel') %>
-    <button class='btn btn-primary btn-sm' type='submit' name='submit'><%= I18n.translate('app.labels.submit') %></button>
-  </span>
+<div class="flex items-center flex-wrap bg-blue-100">
+  <div>
+    <button class="btn btn-default mb-2 lg:mr-2 lg:mb-0 block bg-blue-500 text-white" type='button' name='cancel' onclick="location.href='http://www.example.com'"><%= I18n.translate('app.labels.cancel') %></button>
+  </div>
+  <div>
+    <button class="btn btn-default mb-2 lg:mr-2 lg:mb-0 block bg-blue-500 text-white" type='submit' name='submit'><%= I18n.translate('app.labels.submit') %></button>
+  </div>
 </div>

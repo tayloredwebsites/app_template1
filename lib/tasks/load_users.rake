@@ -1,17 +1,17 @@
-load_users.rake
 namespace :load_users do
-
-  desc "load initial user"
-  task :run do
+  task run: :environment do
     user = User.new()
     user.email = "tayloredwebsites@me.com"
     user.given_name = "Dave"
     user.family_name = "Taylor"
-    user.role = "admin"
+    user.password = 'password'
+    user.password_confirmation = 'password'
+    user.roles = "admin"
     if user.save()
       puts "created Dave user"
     else
-      puts "ERROR creating Dave user"
+      # note split variable indicator for application template parsing
+      puts "ERROR creating Dave user #"+"{user.errors.messages}"
+    end
   end
-
-end # translation_table
+end

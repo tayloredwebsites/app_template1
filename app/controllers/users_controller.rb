@@ -21,11 +21,6 @@ class UsersController < ApplicationController
     :role_public
   ]
 
-    # def index
-    #   @users = User.find(:all, :conditions)
-    #   authorize! :maintain, @users
-    # end
-
   def index
     @users = get_auth_users_list
     if @users.count == 0
@@ -37,12 +32,7 @@ class UsersController < ApplicationController
 
   def registrations
     unauthorized() and return if !user_is_admin?(current_user)
-    @users = get_auth_users_list(true)
-    render :configuration
-  end
-
-  def my_account
-    unauthorized() and return if !user_is_admin?(current_user)
+    @users = get_auth_users_list
     render :configuration
   end
 
@@ -64,7 +54,7 @@ class UsersController < ApplicationController
   def show
     # admins can view all, users can view themselves
     unauthorized() and return if !user_is_admin?(current_user) && !has_same_id?(current_user, @user)
-    @users = get_auth_users_list(true)
+    @users = get_auth_users_list
     render :configuration
   end
 
@@ -88,6 +78,11 @@ class UsersController < ApplicationController
         flash[:success] = I18n.t('user_updated_email', email: @user.email)
       end
     end
+    render :configuration
+  end
+
+  def profile
+    unauthorized() and return if !has_same_id?(current_user, @user)
     render :configuration
   end
 

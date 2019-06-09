@@ -5,6 +5,14 @@ en:
       errors: "ERRORS: "
     messages:
       welcome: "Welcome "
+    labels:
+      cancel: "Cancel"
+      save: "Save"
+      submit: "Submit"
+  nav_bar:
+    home: "Home"
+    users: 'Users'
+    profile: 'Profile'
   users:
     labels:
       email: "E-mail"

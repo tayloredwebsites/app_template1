@@ -65,7 +65,7 @@ end
 
 def devise_user_table
   # Create Devise User
-  generate :devise, "User", "given_name", "family_name", "role", "deleted"
+  generate :devise, "User", "given_name", "family_name", "roles", "deleted"
 end
 
 def devise_bootstrap_views
@@ -79,7 +79,9 @@ def copy_templates
   copy_file ".foreman"
 
   directory "app", force: true
-  # directory "config", force: true
+  copy_file "config/routes.rb", force: true
+  copy_file "config/locales/app.en.yml"
+  copy_file "lib/tasks/load_users.rake"
   # directory "lib", force: true
 
   # route "get '/terms', to: 'home#terms'"
@@ -141,55 +143,34 @@ end
 
 # problems running Rake
 # rake aborted! - NameError: uninitialized constant User
-def create_user
-  rakefile("load_users.rake") do
-    <<-TASK
-      namespace :load_users do
-        task run: :environment do
-          user = User.new()
-          user.email = "tayloredwebsites@me.com"
-          user.given_name = "Dave"
-          user.family_name = "Taylor"
-          user.password = 'password'
-          user.password_confirmation = 'password'
-          user.role = "admin"
-          if user.save()
-            puts "created Dave user"
-          else
-            # note split variable indicator for application template parsing
-            puts "ERROR creating Dave user #"+"{user.errors.messages}"
-          end
-        end
-      end
-    TASK
-  end
-  run "rake load_users:run"
+def run_rake_load_user
+ run "rake load_users:run"
 end
-
 def create_locale_en
   file 'config/locales/app.en.yml', <<-CODE
-    en:
-      app:
-        errors:
-          error: "ERROR: "
-          errors: "ERRORS: "
-        messages:
-          welcome: "Welcome "
-      nav_bar:
-        home: "Home"
-        users: 'Users'
-      users:
-        labels:
-          email: "E-mail"
-          password: "Password"
-          password_confirmation: "Confirm Password"
-          given_name: "Given (first) Name"
-          family_name: "Family (last) Name"
-          role: "Role"
-          deleted: "Deleted"
-        errors:
-          set_invalid_role: "You are not allowed to set this type of user role."
-          email_is_req: "Email is a required field."
+en:
+  app:
+    errors:
+      error: "ERROR: "
+      errors: "ERRORS: "
+    messages:
+      welcome: "Welcome "
+  nav_bar:
+    home: "Home"
+    users: 'Users'
+    account: 'Account'
+  users:
+    labels:
+      email: "E-mail"
+      password: "Password"
+      password_confirmation: "Confirm Password"
+      given_name: "Given (first) Name"
+      family_name: "Family (last) Name"
+      role: "Role"
+      deleted: "Deleted"
+    errors:
+      set_invalid_role: "You are not allowed to set this type of user role."
+      email_is_req: "Email is a required field."
     CODE
 end
 
@@ -215,8 +196,9 @@ after_bundle do
   rails_command "db:create"
   rails_command "db:migrate"
 
-  create_user
-  create_locale_en
+  # create_user
+  run_rake_load_user
+  # create_locale_en
 
   git :init
   git add: "."

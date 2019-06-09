@@ -28,51 +28,44 @@
     <% end %>
   <% end %>
 
-    <header class="mb-4">
-      <nav class="flex items-center justify-between flex-wrap bg-gray-100 py-3 lg:px-10 px-3 text-gray-700 border-b border-gray-400">
-        <div class="flex items-center flex-no-shrink mr-6">
-          <%= link_to "Home", root_path, class:"link text-xl tracking-tight font-semibold" %>
+    <header class="py-3 lg:px-10 px-3">
+      <nav class="flex items-center flex-wrap bg-blue-100 text-white">
+        <div> <!-- class="flex items-center flex-no-shrink mr-6" -->
+          <%= link_to "Home", root_path, class:"btn btn-default mb-2 lg:mr-2 lg:mb-0 block bg-blue-500 text-white" %>
         </div>
-        <div id="nav-burger" class="block lg:hidden">
-          <button class="flex items-center px-3 py-2 border rounded text-grey border-gray-500 hover:text-gray-600 hover:border-gray-600">
+        <div id="nav-burger" class="lg:hidden">
+          <button><!-- class="flex items-center px-3 py-2 border rounded text-grey border-gray-500 hover:text-gray-600 hover:border-gray-600" -->
             <svg class="fill-current h-3 w-3" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><title>Menu</title><path d="M0 3h20v2H0V3zm0 6h20v2H0V9zm0 6h20v2H0v-2z"/></svg>
           </button>
         </div>
-        <div class="w-full block lg:flex-1 lg:flex items-center text-center lg:text-left">
-          <div class="lg:flex-grow">
-            <% if user_signed_in? %>
-              <% if controller.controller_name == 'users' %>
-                <li class="nav-item active" aria-selected='true'>
-                  <a class="nav-link btn btn-primary" href=<%= users_path %>><%= translate('nav_bar.users.name') %></a>
-                </li>
-              <% else %>
-                <li class="nav-item" role='menuitem'>
-                  <a class="nav-link btn btn-primary" href=<%= users_path %>><%= translate('nav_bar.users.name') %></a>
-                </li>
-              <% end %>
-            <% end %>
+
+        <% if user_signed_in? %>
+          <div>
+            <a class="btn btn-default mb-2 lg:mr-2 lg:mb-0 block bg-blue-500 text-white" href=<%= users_path %>><%= translate('nav_bar.profile') %></a>
           </div>
-          <div class="w-full block lg:flex lg:flex-row lg:flex-1 mt-2 lg:mt-0 text-center lg:text-left lg:justify-end">
-            <ul class="list-reset flex">
-            <% if user_signed_in? %>
-              <li class="mr-6">
-                <%= link_to('Logout', destroy_user_session_path, method: :delete, class:"btn btn-default mb-2 lg:mr-2 lg:mb-0 block") %>
-              </li>
-            <% else %>
-              <li class="mr-6">
-                <%= link_to('Login', new_user_session_path, class:"btn btn-default mb-2 lg:mr-2 lg:mb-0 block")  %>
-              </li>
-              <li class="mr-6">
-                <%= link_to "Sign Up", new_user_registration_path, class:"btn btn-default block" %>
-              </li>
-            <% end %>
-            </ul>
+          <% if current_user.is_admin?%>
+            <div>
+              <a class="btn btn-default mb-2 lg:mr-2 lg:mb-0 block bg-blue-500 text-white" href=<%= users_path %>><%= translate('nav_bar.users') %></a>
+            </div>
+          <% end %>
+        <% end %>
+
+        <% if user_signed_in? %>
+          <div>
+            <%= link_to('Logout', destroy_user_session_path, method: :delete, class:"btn btn-default mb-2 lg:mr-2 lg:mb-0 block bg-blue-500 text-white") %>
           </div>
-        </div>
+        <% else %>
+          <div>
+            <%= link_to('Login', new_user_session_path, class:"btn btn-default mb-2 lg:mr-2 lg:mb-0 block bg-blue-500 text-white")  %>
+          </div>
+          <div>
+            <%= link_to "Sign Up", new_user_registration_path, class:"btn btn-default block bg-blue-500 text-white" %>
+          <div>
+        <% end %>
       </nav>
     </header>
 
-    <main class="lg:px-10 px-4">
+    <main class="py-3 lg:px-10 px-3">
       <%= content_for?(:content) ? yield(:content) : yield %>
     </main>
   </body>
